@@ -1,0 +1,22 @@
+[
+  {
+    "id": "e7c9a541-58d1-485f-90d4-977ce4815f94",
+    "name": "Restaurante 1",
+    "owner": "ID do keyclock"
+  },
+  {
+    "id": "c3590464-b9c3-497e-8d60-875b462427cf",
+    "name": "Restaurante 2",
+    "owner": "ID do keyclock"
+  },
+  {
+    "id": "599f3c1c-5995-444c-84c6-9243e9773b46",
+    "name": "Restaurante 3",
+    "owner": "ID do keyclock"
+  },
+  {
+    "id": "818b87dd-6700-4c71-80d4-fa105a1c21fd",
+    "name": "Restaurante 4",
+    "owner": "ID do keyclock"
+  }
+]
