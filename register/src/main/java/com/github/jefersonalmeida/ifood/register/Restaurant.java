@@ -19,7 +19,7 @@ public class Restaurant extends PanacheEntityBase {
     public String owner;
     public String document;
 
-    @ManyToOne
+    @OneToOne(cascade = CascadeType.ALL)
     public Location location;
 
     @CreationTimestamp

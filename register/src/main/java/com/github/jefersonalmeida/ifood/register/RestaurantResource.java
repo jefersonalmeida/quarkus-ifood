@@ -1,13 +1,17 @@
 package com.github.jefersonalmeida.ifood.register;
 
+import com.github.jefersonalmeida.ifood.register.dto.*;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
+import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Path("/restaurants")
 @Produces(MediaType.APPLICATION_JSON)
@@ -15,9 +19,16 @@ import java.util.UUID;
 @Tag(name = "restaurant")
 public class RestaurantResource {
 
+    @Inject
+    RestaurantMapper restaurantMapper;
+
+    @Inject
+    MenuMapper menuMapper;
+
     @GET
-    public List<Restaurant> index() {
-        return Restaurant.listAll();
+    public List<RestaurantDTO> index() {
+        Stream<Restaurant> restaurants = Restaurant.streamAll();
+        return restaurants.map(r -> restaurantMapper.toDTO(r)).collect(Collectors.toList());
     }
 
     private Restaurant findRestaurant(UUID restaurantId) {
@@ -25,26 +36,29 @@ public class RestaurantResource {
         return restaurant.orElseThrow(NotFoundException::new);
     }
 
-    public Menu findMenu(UUID menuId) {
+    private Menu findMenu(UUID menuId) {
         Optional<Menu> menu = Menu.findByIdOptional(menuId);
         return menu.orElseThrow(NotFoundException::new);
     }
 
     @POST
     @Transactional
-    public Restaurant create(Restaurant dto) {
-        dto.persist();
-        return dto;
+    public RestaurantDTO create(CreateRestaurantDTO dto) {
+        Restaurant restaurant = restaurantMapper.toEntity(dto);
+        restaurant.persist();
+        return restaurantMapper.toDTO(restaurant);
     }
 
     @PUT
     @Path("{restaurantId}")
     @Transactional
-    public Restaurant update(@PathParam("restaurantId") UUID restaurantId, Restaurant dto) {
+    public RestaurantDTO update(@PathParam("restaurantId") UUID restaurantId, UpdateRestaurantDTO dto) {
         Restaurant restaurant = findRestaurant(restaurantId);
-        restaurant.name = dto.name;
+
+        // atualizando por referência
+        restaurantMapper.toEntity(dto, restaurant);
         restaurant.persist();
-        return restaurant;
+        return restaurantMapper.toDTO(restaurant);
     }
 
     @DELETE
@@ -57,34 +71,34 @@ public class RestaurantResource {
 
     @GET
     @Path("{restaurantId}/menus")
-    public List<Restaurant> menus(@PathParam("restaurantId") UUID restaurantId) {
+    public List<MenuDTO> menus(@PathParam("restaurantId") UUID restaurantId) {
         Restaurant restaurant = findRestaurant(restaurantId);
-        return Menu.list("restaurant", restaurant);
+
+        Stream<Menu> menus = Menu.stream("restaurant", restaurant);
+        return menus.map(p -> menuMapper.toDTO(p)).collect(Collectors.toList());
     }
 
     @POST
     @Path("{restaurantId}/menus")
     @Transactional
     @Tag(name = "menu")
-    public Menu createMenu(@PathParam("restaurantId") UUID restaurantId, Menu dto) {
+    public MenuDTO createMenu(@PathParam("restaurantId") UUID restaurantId, CreateMenuDTO dto) {
         Restaurant restaurant = findRestaurant(restaurantId);
-        Menu menu = new Menu();
-        menu.name = dto.name;
-        menu.description = dto.description;
-        menu.price = dto.price;
+
+        Menu menu = menuMapper.toEntity(dto);
         menu.restaurant = restaurant;
         menu.persist();
-        return menu;
+        return menuMapper.toDTO(menu);
     }
 
     @PUT
     @Path("{restaurantId}/menus/{menuId}")
     @Transactional
     @Tag(name = "menu")
-    public Menu updateMenu(
+    public MenuDTO updateMenu(
             @PathParam("restaurantId") UUID restaurantId,
             @PathParam("menuId") UUID menuId,
-            Menu dto) {
+            UpdateMenuDTO dto) {
 
         Restaurant restaurant = findRestaurant(restaurantId);
         Menu menu = findMenu(menuId);
@@ -93,9 +107,9 @@ public class RestaurantResource {
             throw new IllegalArgumentException();
         }
 
-        menu.price = dto.price;
+        menuMapper.toEntity(dto, menu);
         menu.persist();
-        return menu;
+        return menuMapper.toDTO(menu);
     }
 
     @DELETE
