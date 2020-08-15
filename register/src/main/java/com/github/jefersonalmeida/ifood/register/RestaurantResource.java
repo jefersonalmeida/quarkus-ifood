@@ -1,10 +1,15 @@
 package com.github.jefersonalmeida.ifood.register;
 
 import com.github.jefersonalmeida.ifood.register.dto.*;
+import com.github.jefersonalmeida.ifood.register.infra.ConstraintViolationResponse;
+import org.eclipse.microprofile.openapi.annotations.media.Content;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
+import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.util.List;
@@ -43,7 +48,17 @@ public class RestaurantResource {
 
     @POST
     @Transactional
-    public RestaurantDTO create(CreateRestaurantDTO dto) {
+    @APIResponse(
+            responseCode = "201",
+            description = "Caso restaurante seja cadastrado com sucesso",
+            content = @Content(schema = @Schema(allOf = RestaurantDTO.class))
+    )
+    @APIResponse(
+            responseCode = "400",
+            description = "Caso haja algum erro na validação dos dados",
+            content = @Content(schema = @Schema(allOf = ConstraintViolationResponse.class))
+    )
+    public RestaurantDTO create(@Valid CreateRestaurantDTO dto) {
         Restaurant restaurant = restaurantMapper.toEntity(dto);
         restaurant.persist();
         return restaurantMapper.toDTO(restaurant);
@@ -52,7 +67,7 @@ public class RestaurantResource {
     @PUT
     @Path("{restaurantId}")
     @Transactional
-    public RestaurantDTO update(@PathParam("restaurantId") UUID restaurantId, UpdateRestaurantDTO dto) {
+    public RestaurantDTO update(@Valid @PathParam("restaurantId") UUID restaurantId, UpdateRestaurantDTO dto) {
         Restaurant restaurant = findRestaurant(restaurantId);
 
         // atualizando por referência
@@ -82,7 +97,7 @@ public class RestaurantResource {
     @Path("{restaurantId}/menus")
     @Transactional
     @Tag(name = "menu")
-    public MenuDTO createMenu(@PathParam("restaurantId") UUID restaurantId, CreateMenuDTO dto) {
+    public MenuDTO createMenu(@Valid @PathParam("restaurantId") UUID restaurantId, CreateMenuDTO dto) {
         Restaurant restaurant = findRestaurant(restaurantId);
 
         Menu menu = menuMapper.toEntity(dto);
@@ -96,6 +111,7 @@ public class RestaurantResource {
     @Transactional
     @Tag(name = "menu")
     public MenuDTO updateMenu(
+            @Valid
             @PathParam("restaurantId") UUID restaurantId,
             @PathParam("menuId") UUID menuId,
             UpdateMenuDTO dto) {
