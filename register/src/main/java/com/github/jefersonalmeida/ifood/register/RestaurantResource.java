@@ -2,6 +2,9 @@ package com.github.jefersonalmeida.ifood.register;
 
 import com.github.jefersonalmeida.ifood.register.dto.*;
 import com.github.jefersonalmeida.ifood.register.infra.ConstraintViolationResponse;
+import org.eclipse.microprofile.metrics.annotation.Counted;
+import org.eclipse.microprofile.metrics.annotation.SimplyTimed;
+import org.eclipse.microprofile.metrics.annotation.Timed;
 import org.eclipse.microprofile.openapi.annotations.enums.SecuritySchemeType;
 import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
@@ -38,6 +41,9 @@ public class RestaurantResource {
     MenuMapper menuMapper;
 
     @GET
+    @Counted(name = "Quantidade de buscas por Restaurantes")
+    @SimplyTimed(name = "Tempo simples de busca")
+    @Timed(name = "Tempo completo de busca")
     public List<RestaurantDTO> index() {
         Stream<Restaurant> restaurants = Restaurant.streamAll();
         return restaurants.map(r -> restaurantMapper.toDTO(r)).collect(Collectors.toList());
