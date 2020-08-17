@@ -2,13 +2,16 @@ package com.github.jefersonalmeida.ifood.register;
 
 import com.github.database.rider.cdi.api.DBRider;
 import com.github.database.rider.core.api.dataset.DataSet;
+import com.github.jefersonalmeida.ifood.register.util.TokenUtils;
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import io.restassured.http.Header;
 import io.restassured.specification.RequestSpecification;
 import org.approvaltests.Approvals;
 import org.junit.Assert;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
@@ -17,6 +20,13 @@ import java.util.UUID;
 @QuarkusTest
 @QuarkusTestResource(RegisterTestLifecycle.class)
 public class RestaurantResourceTest {
+
+    private String token;
+
+    @BeforeEach
+    public void generateToken() throws Exception {
+        token = TokenUtils.generateTokenString("/JWTRestaurantOwnerClaims.json", null);
+    }
 
     @Test
     @DataSet(value = "restaurants-test-1.yml")
@@ -32,7 +42,10 @@ public class RestaurantResourceTest {
     }
 
     private RequestSpecification given() {
-        return RestAssured.given().contentType(ContentType.JSON);
+        return RestAssured
+                .given()
+                .contentType(ContentType.JSON)
+                .header(new Header("Authorization", "Bearer " + token));
     }
 
     @Test

@@ -65,6 +65,10 @@
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-smallrye-jwt</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
             <artifactId>quarkus-jdbc-postgresql</artifactId>
         </dependency>
         <dependency>
@@ -133,7 +137,6 @@
                 <configuration>
                     <systemPropertyVariables>
                         <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
-                        <maven.home>${maven.home}</maven.home>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
@@ -180,7 +183,7 @@
                 <plugins>
                     <plugin>
                         <artifactId>maven-failsafe-plugin</artifactId>
-                        <version>${failsafe-plugin.version}</version>
+                        <version>${surefire-plugin.version}</version>
                         <executions>
                             <execution>
                                 <goals>
@@ -194,7 +197,6 @@
                                         </native.image.path>
                                         <java.util.logging.manager>org.jboss.logmanager.LogManager
                                         </java.util.logging.manager>
-                                        <maven.home>${maven.home}</maven.home>
                                     </systemPropertyVariables>
                                 </configuration>
                             </execution>
