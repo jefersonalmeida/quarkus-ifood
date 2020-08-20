@@ -44,3 +44,11 @@ services:
     container_name: ifood_grafana
     image: grafana/grafana:6.7.0
     network_mode: host
+
+  ifood_artemis:
+    container_name: ifood_artemis
+    image: vromero/activemq-artemis:2.11.0
+    environment:
+      ARTEMIS_USERNAME: admin
+      ARTEMIS_PASSWORD: admin
+    network_mode: host

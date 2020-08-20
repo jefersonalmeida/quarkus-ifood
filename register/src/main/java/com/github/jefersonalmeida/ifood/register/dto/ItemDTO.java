@@ -1,9 +1,12 @@
 package com.github.jefersonalmeida.ifood.register.dto;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
-public class CreateMenuDTO {
+public class ItemDTO {
+    public UUID id;
     public String name;
     public String description;
+    public RestaurantDTO restaurant;
     public BigDecimal price;
 }

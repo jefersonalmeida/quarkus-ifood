@@ -1,15 +1,21 @@
-create table if not exists restaurants
+create table if not exists public.restaurants
 (
     id          uuid not null,
-    createdat   timestamp,
-    document    varchar(255),
+    location_id uuid,
     name        varchar(255),
     owner       varchar(255),
-    updatedat   timestamp,
-    location_id uuid,
+    document    varchar(255),
+    created_at  timestamp,
+    updated_at  timestamp,
     constraint restaurants_pkey
         primary key (id),
-    constraint fk4yrawo6eulwjhc58gt5ndl5k4
-        foreign key (location_id) references locations
+    constraint restaurants_fk_location_id
+        foreign key (location_id) references public.locations
 );
 
+
+create unique index if not exists restaurants_unique
+    on public.restaurants (id);
+
+create index if not exists restaurants_index
+    on public.restaurants (id);

@@ -13,9 +13,13 @@ import org.eclipse.microprofile.openapi.annotations.security.OAuthFlow;
 import org.eclipse.microprofile.openapi.annotations.security.OAuthFlows;
 import org.eclipse.microprofile.openapi.annotations.security.SecurityScheme;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+import org.eclipse.microprofile.reactive.messaging.Channel;
+import org.eclipse.microprofile.reactive.messaging.Emitter;
 
 import javax.annotation.security.RolesAllowed;
 import javax.inject.Inject;
+import javax.json.bind.Jsonb;
+import javax.json.bind.JsonbBuilder;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.ws.rs.*;
@@ -38,7 +42,11 @@ public class RestaurantResource {
     RestaurantMapper restaurantMapper;
 
     @Inject
-    MenuMapper menuMapper;
+    ItemMapper itemMapper;
+
+    @Inject
+    @Channel("restaurants")
+    Emitter<String> emitter;
 
     @GET
     @Counted(name = "Quantidade de buscas por Restaurantes")
@@ -54,8 +62,8 @@ public class RestaurantResource {
         return restaurant.orElseThrow(NotFoundException::new);
     }
 
-    private Menu findMenu(UUID menuId) {
-        Optional<Menu> menu = Menu.findByIdOptional(menuId);
+    private Item findMenu(UUID itemId) {
+        Optional<Item> menu = Item.findByIdOptional(itemId);
         return menu.orElseThrow(NotFoundException::new);
     }
 
@@ -74,6 +82,11 @@ public class RestaurantResource {
     public RestaurantDTO create(@Valid CreateRestaurantDTO dto) {
         Restaurant restaurant = restaurantMapper.toEntity(dto);
         restaurant.persist();
+
+        Jsonb jsonb = JsonbBuilder.create();
+        String json = jsonb.toJson(restaurant);
+        emitter.send(json);
+
         return restaurantMapper.toDTO(restaurant);
     }
 
@@ -98,64 +111,64 @@ public class RestaurantResource {
     }
 
     @GET
-    @Path("{restaurantId}/menus")
-    public List<MenuDTO> menus(@PathParam("restaurantId") UUID restaurantId) {
+    @Path("{restaurantId}/items")
+    public List<ItemDTO> items(@PathParam("restaurantId") UUID restaurantId) {
         Restaurant restaurant = findRestaurant(restaurantId);
 
-        Stream<Menu> menus = Menu.stream("restaurant", restaurant);
-        return menus.map(p -> menuMapper.toDTO(p)).collect(Collectors.toList());
+        Stream<Item> items = Item.stream("restaurant", restaurant);
+        return items.map(p -> itemMapper.toDTO(p)).collect(Collectors.toList());
     }
 
     @POST
-    @Path("{restaurantId}/menus")
+    @Path("{restaurantId}/items")
     @Transactional
     @Tag(name = "menu")
-    public MenuDTO createMenu(@Valid @PathParam("restaurantId") UUID restaurantId, CreateMenuDTO dto) {
+    public ItemDTO createMenu(@Valid @PathParam("restaurantId") UUID restaurantId, CreateItemDTO dto) {
         Restaurant restaurant = findRestaurant(restaurantId);
 
-        Menu menu = menuMapper.toEntity(dto);
-        menu.restaurant = restaurant;
-        menu.persist();
-        return menuMapper.toDTO(menu);
+        Item item = itemMapper.toEntity(dto);
+        item.restaurant = restaurant;
+        item.persist();
+        return itemMapper.toDTO(item);
     }
 
     @PUT
-    @Path("{restaurantId}/menus/{menuId}")
+    @Path("{restaurantId}/items/{itemId}")
     @Transactional
     @Tag(name = "menu")
-    public MenuDTO updateMenu(
+    public ItemDTO updateMenu(
             @Valid
             @PathParam("restaurantId") UUID restaurantId,
-            @PathParam("menuId") UUID menuId,
-            UpdateMenuDTO dto) {
+            @PathParam("itemId") UUID itemId,
+            UpdateItemDTO dto) {
 
         Restaurant restaurant = findRestaurant(restaurantId);
-        Menu menu = findMenu(menuId);
+        Item item = findMenu(itemId);
 
-        if (!menu.restaurant.equals(restaurant)) {
+        if (!item.restaurant.equals(restaurant)) {
             throw new IllegalArgumentException();
         }
 
-        menuMapper.toEntity(dto, menu);
-        menu.persist();
-        return menuMapper.toDTO(menu);
+        itemMapper.toEntity(dto, item);
+        item.persist();
+        return itemMapper.toDTO(item);
     }
 
     @DELETE
-    @Path("{restaurantId}/menus/{menuId}")
+    @Path("{restaurantId}/items/{itemId}")
     @Transactional
     @Tag(name = "menu")
     public void deleteMenu(
             @PathParam("restaurantId") UUID restaurantId,
-            @PathParam("menuId") UUID menuId) {
+            @PathParam("itemId") UUID itemId) {
 
         Restaurant restaurant = findRestaurant(restaurantId);
-        Menu menu = findMenu(menuId);
+        Item item = findMenu(itemId);
 
-        if (!menu.restaurant.equals(restaurant)) {
+        if (!item.restaurant.equals(restaurant)) {
             throw new IllegalArgumentException();
         }
 
-        menu.delete();
+        item.delete();
     }
 }

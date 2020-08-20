@@ -1,4 +1,4 @@
-create table if not exists locations
+create table if not exists public.locations
 (
     id        uuid not null,
     latitude  double precision,
@@ -6,3 +6,9 @@ create table if not exists locations
     constraint locations_pkey
         primary key (id)
 );
+
+create unique index if not exists locations_unique
+    on public.locations (id);
+
+create index if not exists locations_index
+    on public.locations (id);

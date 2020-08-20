@@ -7,8 +7,8 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 @Entity
-@Table(schema = "public", name = "menus")
-public class Menu extends PanacheEntityBase {
+@Table(schema = "public", name = "items")
+public class Item extends PanacheEntityBase {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
