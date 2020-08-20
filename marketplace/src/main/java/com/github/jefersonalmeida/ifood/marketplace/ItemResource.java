@@ -1,5 +1,6 @@
 package com.github.jefersonalmeida.ifood.marketplace;
 
+import com.github.jefersonalmeida.ifood.marketplace.dto.ItemDTO;
 import io.smallrye.mutiny.Multi;
 import io.vertx.mutiny.pgclient.PgPool;
 

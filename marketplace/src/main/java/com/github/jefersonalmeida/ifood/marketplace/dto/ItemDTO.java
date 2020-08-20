@@ -1,4 +1,4 @@
-package com.github.jefersonalmeida.ifood.marketplace;
+package com.github.jefersonalmeida.ifood.marketplace.dto;
 
 import io.vertx.mutiny.sqlclient.Row;
 
@@ -7,8 +7,11 @@ import java.util.UUID;
 
 public class ItemDTO {
     public UUID id;
+
     public String name;
+
     public String description;
+
     public BigDecimal price;
 
     public static ItemDTO from(Row row) {

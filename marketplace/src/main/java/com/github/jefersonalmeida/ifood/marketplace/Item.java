@@ -1,5 +1,6 @@
 package com.github.jefersonalmeida.ifood.marketplace;
 
+import com.github.jefersonalmeida.ifood.marketplace.dto.ItemDTO;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 import io.vertx.mutiny.pgclient.PgPool;
@@ -36,5 +37,15 @@ public class Item {
         ).execute(Tuple.of(restaurantId));
 
         return unitToMulti(execute);
+    }
+
+    public static Uni<ItemDTO> findById(PgPool pgPool, UUID id) {
+        return pgPool.preparedQuery("select * from public.items where id = $1")
+                .execute(Tuple.of(id))
+                .map(RowSet::iterator)
+                .map(iterator -> iterator.hasNext()
+                        ? ItemDTO.from(iterator.next())
+                        : null
+                );
     }
 }
