@@ -1,14 +1,24 @@
 version: "3"
 
 services:
-  #  postgres_register:
-  #    container_name: ifood_postgres_register
-  #    image: postgres:12.3-alpine
-  #    environment:
-  #      POSTGRES_USER: register
-  #      POSTGRES_PASSWORD: register
-  #    ports:
-  #      - 5433:5432
+
+  ifood_db_register:
+    container_name: ifood_db_register
+    image: postgres:12.3-alpine
+    environment:
+      POSTGRES_USER: register
+      POSTGRES_PASSWORD: register
+    ports:
+      - 5433:5432
+
+  ifood_db_marketplace:
+    container_name: ifood_db_marketplace
+    image: postgres:12.3-alpine
+    environment:
+      POSTGRES_USER: marketplace
+      POSTGRES_PASSWORD: marketplace
+    ports:
+      - 5434:5432
 
   ifood_keycloak:
     container_name: ifood_keycloak
@@ -53,13 +63,12 @@ services:
       ARTEMIS_PASSWORD: admin
     network_mode: host
 
-  ifood_mongodb:
-    container_name: ifood_mongodb
+  ifood_db_order:
+    container_name: ifood_db_order
     image: library/mongo:4-bionic
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: admin
-      MONGO_INITDB_DATABASE: orders
     ports:
       - 27017:27017
 

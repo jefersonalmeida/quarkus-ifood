@@ -9,7 +9,7 @@ import java.util.List;
 public class Order extends PanacheMongoEntity {
 
     public String client;
-    public String restaurant;
+    public Restaurant restaurant;
     public List<Item> items;
     public String deliveryman;
     public Location location;
