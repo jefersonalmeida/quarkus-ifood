@@ -6,10 +6,15 @@ import org.bson.types.Decimal128;
 import org.eclipse.microprofile.reactive.messaging.Incoming;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.json.bind.JsonbBuilder;
 import java.util.ArrayList;
 
 @ApplicationScoped
 public class OrderCompletedIncoming {
+
+    @Inject
+    ElasticService elasticService;
 
     @Incoming("orders")
     public void readOrders(OrderCompletedDTO dto) {
@@ -19,13 +24,17 @@ public class OrderCompletedIncoming {
 
         Order order = new Order();
         order.client = dto.client;
+
         order.items = new ArrayList<>();
         dto.items.forEach(i -> order.items.add(from(i)));
 
         Restaurant restaurant = new Restaurant();
         restaurant.name = dto.restaurant.name;
-
         order.restaurant = restaurant;
+
+        String json = JsonbBuilder.create().toJson(dto);
+        elasticService.index("orders", json);
+
         order.persist();
     }
 
