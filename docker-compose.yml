@@ -52,3 +52,14 @@ services:
       ARTEMIS_USERNAME: admin
       ARTEMIS_PASSWORD: admin
     network_mode: host
+
+  ifood_mongodb:
+    container_name: ifood_mongodb
+    image: library/mongo:4-bionic
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin
+      MONGO_INITDB_DATABASE: orders
+    ports:
+      - 27017:27017
+    network_mode: host
