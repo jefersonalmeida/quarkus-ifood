@@ -4,7 +4,7 @@ services:
 
   ifood_db_register:
     container_name: ifood_db_register
-    image: postgres:12.3-alpine
+    image: debezium/example-postgres # essa versao vem com as configuracoes necessarias para o connector do debezium
     environment:
       POSTGRES_USER: register
       POSTGRES_PASSWORD: register
@@ -134,3 +134,23 @@ services:
       - ./pipelines:/usr/share/logstash/pipeline
     depends_on:
       - ifood_elasticsearch
+
+  #roda na 8083
+  ifood_connect:
+    container_name: ifood_connect
+    image: debezium/connect:1.1
+    environment:
+      - BOOTSTRAP_SERVERS=ifood_kafka:9092
+      - GROUP_ID=1
+      - CONFIG_STORAGE_TOPIC=ifood_connect_configs
+      - OFFSET_STORAGE_TOPIC=ifood_connect_offsets
+      - STATUS_STORAGE_TOPIC=ifood_connect_statuses
+    ports:
+      - 8083:8083
+    links:
+      - ifood_kafka
+      - ifood_db_register
+    depends_on:
+      - ifood_kafka
+      - ifood_zookeeper
+      - ifood_db_register

@@ -23,8 +23,8 @@ public class Restaurant extends PanacheEntityBase {
     public Location location;
 
     @CreationTimestamp
-    public OffsetDateTime created_at;
+    public OffsetDateTime createdAt;
 
     @UpdateTimestamp
-    public OffsetDateTime updated_at;
+    public OffsetDateTime updatedAt;
 }
