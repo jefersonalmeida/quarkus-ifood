@@ -2,6 +2,9 @@ package com.github.jefersonalmeida.ifood.register;
 
 import com.github.jefersonalmeida.ifood.register.dto.*;
 import com.github.jefersonalmeida.ifood.register.infra.ConstraintViolationResponse;
+import org.eclipse.microprofile.jwt.Claim;
+import org.eclipse.microprofile.jwt.Claims;
+import org.eclipse.microprofile.jwt.JsonWebToken;
 import org.eclipse.microprofile.metrics.annotation.Counted;
 import org.eclipse.microprofile.metrics.annotation.SimplyTimed;
 import org.eclipse.microprofile.metrics.annotation.Timed;
@@ -48,6 +51,13 @@ public class RestaurantResource {
     @Channel("restaurants")
     Emitter<String> emitter;
 
+    @Inject
+    JsonWebToken jwt;
+
+    @Inject
+    @Claim(standard = Claims.sub)
+    String sub;
+
     @GET
     @Counted(name = "Quantidade de buscas por Restaurantes")
     @SimplyTimed(name = "Tempo simples de busca")
@@ -59,6 +69,9 @@ public class RestaurantResource {
 
     private Restaurant findRestaurant(UUID restaurantId) {
         Optional<Restaurant> restaurant = Restaurant.findByIdOptional(restaurantId);
+        if (restaurant.isPresent() && !restaurant.get().owner.equals(sub)) {
+            throw new ForbiddenException("Você não tem acesso nesta informação");
+        }
         return restaurant.orElseThrow(NotFoundException::new);
     }
 
@@ -81,6 +94,7 @@ public class RestaurantResource {
     )
     public RestaurantDTO create(@Valid CreateRestaurantDTO dto) {
         Restaurant restaurant = restaurantMapper.toEntity(dto);
+        restaurant.owner = sub;
         restaurant.persist();
 
         Jsonb jsonb = JsonbBuilder.create();
