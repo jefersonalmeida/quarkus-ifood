@@ -125,3 +125,12 @@ services:
     network_mode: host
     environment:
       ELASTICSEARCH_HOSTS: http://localhost:9200
+
+  ifood_logstash:
+    container_name: ifood_logstash
+    image: docker.elastic.co/logstash/logstash-oss:6.8.2
+    network_mode: host
+    volumes:
+      - ./pipelines:/usr/share/logstash/pipeline
+    depends_on:
+      - ifood_elasticsearch
